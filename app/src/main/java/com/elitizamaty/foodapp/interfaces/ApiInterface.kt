@@ -1,10 +1,10 @@
 package com.elitizamaty.foodapp.interfaces
 
+import com.elitizamaty.foodapp.models.responses.SignUpResponse
 import com.elitizamaty.foodapp.models.responses.UnknownListResponse
 import com.elitizamaty.foodapp.models.responses.UserListResponse
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiInterface {
     @GET("api/users")
@@ -12,4 +12,14 @@ interface ApiInterface {
 
     @GET("api/unknown")
     fun getUnknownList(): Call<UnknownListResponse>
+
+    @FormUrlEncoded
+    @POST("api/users/sign_up")
+    fun signUp(
+        @Field("name") name: String,
+        @Field("mobile") mobile: String,
+        @Field("email") email: String,
+        @Field("address") address: String,
+        @Field("password") password: String
+    ): Call<SignUpResponse>
 }
