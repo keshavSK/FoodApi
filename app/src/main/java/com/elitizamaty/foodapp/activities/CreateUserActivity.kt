@@ -2,13 +2,15 @@ package com.elitizamaty.foodapp.activities
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.elitizamaty.foodapp.R
+import com.elitizamaty.foodapp.adapters.StateAdapter
 import com.elitizamaty.foodapp.interfaces.ApiInterface
+import com.elitizamaty.foodapp.models.data_models.StateModel
 import com.elitizamaty.foodapp.models.responses.SignUpResponse
+import com.elitizamaty.foodapp.models.responses.StateResponse
 import com.elitizamaty.foodapp.models.rest_api.RestAdapterContainer
 import retrofit2.Call
 import retrofit2.Callback
@@ -21,6 +23,8 @@ class CreateUserActivity : AppCompatActivity() {
     private var edtAddress: EditText? = null
     private var edtPassword: EditText? = null
     private var btnSignUp: Button? = null
+    private var spinnerState: Spinner? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_user)
@@ -30,8 +34,63 @@ class CreateUserActivity : AppCompatActivity() {
         edtAddress = findViewById(R.id.edtUserAddress)
         edtPassword = findViewById(R.id.edtUserPassword)
         btnSignUp = findViewById(R.id.btnSignUp)
+        spinnerState = findViewById(R.id.spinnerState)
 
         var service = RestAdapterContainer.getInstance().create(ApiInterface::class.java)
+        var stateCall = service.getState("1")
+        stateCall.enqueue(object : Callback<StateResponse> {
+            override fun onFailure(call: Call<StateResponse>, t: Throwable) {
+                Log.e(Companion.TAG, "onFailure: ${t.localizedMessage}")
+            }
+
+            override fun onResponse(call: Call<StateResponse>, response: Response<StateResponse>) {
+                if (response.body() == null) {
+                    Toast.makeText(
+                        this@CreateUserActivity,
+                        "State response not available",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
+                val stateResponse = response.body()
+                if (stateResponse?.status == 200) {
+                    var stateList = stateResponse.States
+                    if (stateList!!.isNotEmpty()) {
+                        var stateAdapter = StateAdapter(this@CreateUserActivity, stateList)
+                        spinnerState?.adapter = stateAdapter
+                        stateAdapter.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(
+                            this@CreateUserActivity,
+                            "${stateResponse.Message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+
+        spinnerState?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                p1: View?,
+                position: Int,
+                p3: Long
+            ) {
+                var stateModel = parent!!.getItemAtPosition(position) as StateModel
+                var stateId = stateModel.StateId
+                var stateName = stateModel.StateName
+                Toast.makeText(
+                    this@CreateUserActivity,
+                    "$stateName",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         btnSignUp?.setOnClickListener {
             var name = edtName?.text.toString().trim()

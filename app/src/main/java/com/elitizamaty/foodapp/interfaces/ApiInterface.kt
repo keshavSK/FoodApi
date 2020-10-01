@@ -1,6 +1,7 @@
 package com.elitizamaty.foodapp.interfaces
 
 import com.elitizamaty.foodapp.models.responses.SignUpResponse
+import com.elitizamaty.foodapp.models.responses.StateResponse
 import com.elitizamaty.foodapp.models.responses.UnknownListResponse
 import com.elitizamaty.foodapp.models.responses.UserListResponse
 import retrofit2.Call
@@ -22,4 +23,7 @@ interface ApiInterface {
         @Field("address") address: String,
         @Field("password") password: String
     ): Call<SignUpResponse>
+
+    @GET("api/users/get_states")
+    fun getState(@Query("country_id") countryId: String): Call<StateResponse>
 }
